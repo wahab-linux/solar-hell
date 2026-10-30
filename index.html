@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0e19">
+  <title>solar-hell</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7fb;
+      --paper: #fff;
+      --ink: #1b2235;
+      --muted: #737c91;
+      --line: #e7eaf1;
+      --accent: #6655df;
+      --accent-dark: #4e3cc4;
+      --accent-light: #f0edff;
+      --good: #198465;
+      --good-light: #eaf8f1;
+      --warn: #a86622;
+      --shadow: 0 10px 35px rgba(28, 37, 77, .035);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible { outline: 3px solid #b6aaff; outline-offset: 3px; }
+    .app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; }
+    .sidebar { position: sticky; top: 0; height: 100vh; padding: 30px 16px 20px; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+    .brand { display: flex; align-items: center; gap: 12px; padding: 0 12px 38px; }
+    .brand-mark { display: grid; place-items: center; width: 39px; height: 39px; border-radius: 13px; color: white; font-weight: 850; letter-spacing: -1px; font-size: 21px; background: var(--accent); box-shadow: 0 7px 15px #6655df36; }
+    .brand strong { display: block; letter-spacing: -.6px; font-size: 17px; }
+    .brand span:last-child { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 650; letter-spacing: .9px; }
+    .nav-label { padding: 0 14px; margin: 0 0 10px; font-size: 10px; font-weight: 800; letter-spacing: 1.65px; color: #9ca4b6; text-transform: uppercase; }
+    .nav { display: flex; flex-direction: column; gap: 5px; }
+    .nav-btn { border: 0; width: 100%; text-align: left; background: transparent; color: #606b80; border-radius: 12px; padding: 11px 12px; display: flex; align-items: center; gap: 11px; font-size: 13px; font-weight: 650; transition: background .15s, color .15s; }
+    .nav-btn:hover { background: #f7f7fb; color: var(--ink); }
+    .nav-btn.active { background: var(--accent-light); color: #5948ca; }
+    .nav-icon { flex: none; width: 29px; height: 29px; border-radius: 9px; display: grid; place-items: center; color: #7664d9; background: #f1eeff; font-size: 11px; font-weight: 850; letter-spacing: -.3px; }
+    .nav-btn.active .nav-icon { color: white; background: var(--accent); }
+    .nav-text { flex: 1; }
+    .nav-credits { margin-left: auto; color: #a5abba; font-size: 11px; font-weight: 650; }
+    .side-bottom { margin-top: auto; padding: 18px 13px 0; color: #8992a5; font-size: 11px; line-height: 1.8; border-top: 1px solid var(--line); }
+    .side-bottom strong { display: block; color: #515d74; font-size: 12px; font-weight: 700; }
+    .main { width: min(100%, 1310px); min-width: 0; margin: 0 auto; padding: 35px clamp(20px, 4.1vw, 66px) 40px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 32px; }
+    .eyebrow { font-size: 11px; font-weight: 800; color: #8e96a8; letter-spacing: 1.5px; text-transform: uppercase; }
+    .top-actions { display: flex; gap: 9px; flex-wrap: wrap; justify-content: flex-end; }
+    .btn { border: 1px solid #e3e6ef; padding: 10px 14px; background: white; color: #4d5770; border-radius: 11px; font-size: 12px; font-weight: 750; display: inline-flex; align-items: center; gap: 8px; transition: transform .15s, border-color .15s, background .15s; }
+    .btn:hover { border-color: #bab1f5; background: #fbfaff; transform: translateY(-1px); }
+    .btn.primary { color: white; background: var(--accent); border-color: var(--accent); }
+    .btn.primary:hover { background: var(--accent-dark); }
+    .btn.danger { color: #b14d56; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { font-size: clamp(30px, 3.7vw, 46px); line-height: 1.13; letter-spacing: -1.8px; font-weight: 790; margin: 9px 0 13px; }
+    h2 { font-size: 21px; letter-spacing: -.55px; margin: 0; }
+    h3 { font-size: 15px; letter-spacing: -.25px; margin: 0; }
+    .muted { color: var(--muted); }
+    .intro { margin-bottom: 26px; }
+    .intro p { color: var(--muted); line-height: 1.65; max-width: 680px; font-size: 14px; margin: 0; }
+    .feature-grid { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 15px; margin-bottom: 16px; }
+    .panel { border: 1px solid var(--line); background: var(--paper); border-radius: 19px; box-shadow: var(--shadow); }
+    .stat { padding: 25px; min-width: 0; }
+    .stat.feature { color: #fff; border: none; background: linear-gradient(125deg, #6c5be5, #5842cd 75%, #4532ac); position: relative; overflow: hidden; }
+    .stat.feature:after { content: ""; position: absolute; right: -40px; top: -90px; width: 230px; height: 230px; border: 45px solid #ffffff12; border-radius: 50%; pointer-events: none; }
+    .stat-label { text-transform: uppercase; letter-spacing: 1.15px; color: #8a93a6; font-size: 10px; font-weight: 850; }
+    .stat.feature .stat-label { color: #ded9ff; }
+    .stat-value { font-size: clamp(29px, 3vw, 42px); font-weight: 790; letter-spacing: -1.8px; margin: 17px 0 7px; font-variant-numeric: tabular-nums; }
+    .stat-value.large { font-size: clamp(39px, 4.5vw, 59px); margin: 14px 0 4px; }
+    .stat-caption { color: #8a93a6; font-size: 12px; line-height: 1.55; }
+    .stat.feature .stat-caption { color: #e3ddff; }
+    .scenario { padding: 21px 25px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, 1.1fr) minmax(150px, .7fr); align-items: center; gap: 24px; margin-bottom: 32px; }
+    .scenario-title { font-size: 14px; font-weight: 790; margin-bottom: 5px; }
+    .scenario-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+    .control-label { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; font-weight: 700; color: #526078; margin-bottom: 11px; }
+    .control-label output { color: var(--accent-dark); font-size: 14px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    input[type="range"] { accent-color: var(--accent); display: block; width: 100%; cursor: pointer; margin: 8px 0 2px; }
+    .target-wrap { display: flex; align-items: center; gap: 7px; }
+    .target-input { border: 1px solid #dfe2ec; border-radius: 10px; height: 36px; width: 100%; padding: 7px 12px; color: var(--ink); font-weight: 780; font-variant-numeric: tabular-nums; background: #fafbfe; }
+    .target-wrap span { color: #81899d; font-size: 13px; font-weight: 750; }
+    .section-head { margin: 34px 0 16px; display: flex; justify-content: space-between; align-items: flex-end; gap: 14px; }
+    .section-head p { color: var(--muted); font-size: 12px; margin: 7px 0 0; }
+    .section-tag { color: #9184e4; background: #f0edff; font-size: 11px; font-weight: 750; border-radius: 100px; padding: 7px 11px; white-space: nowrap; }
+    .course-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+    .course-card { text-align: left; position: relative; min-width: 0; width: 100%; padding: 22px 23px; border-radius: 18px; background: white; border: 1px solid var(--line); box-shadow: var(--shadow); transition: transform .15s, border-color .15s, box-shadow .15s; }
+    .course-card:hover { transform: translateY(-3px); border-color: #cbc5fa; box-shadow: 0 15px 28px rgba(61, 44, 123, .07); }
+    .course-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+    .course-emblem { width: 45px; height: 45px; display: grid; place-items: center; color: var(--accent); background: #f0edff; border-radius: 13px; font-weight: 860; font-size: 12px; letter-spacing: -.4px; }
+    .credit-badge { background: #f5f6f9; color: #81899a; border-radius: 100px; padding: 7px 10px; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .course-code { color: #929aaa; font-size: 10px; letter-spacing: 1.1px; font-weight: 800; margin: 18px 0 4px; }
+    .course-title { font-size: 18px; font-weight: 800; letter-spacing: -.5px; }
+    .course-metrics { display: flex; align-items: baseline; justify-content: space-between; margin-top: 23px; gap: 12px; }
+    .course-score { font-size: 30px; letter-spacing: -1.2px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .course-score small { display: block; font-size: 10px; letter-spacing: .9px; font-weight: 800; text-transform: uppercase; color: #a0a7b5; margin-bottom: 4px; }
+    .course-submetric { color: #929aaa; font-size: 11px; text-align: right; }
+    .course-submetric strong { display: block; color: #6e7790; font-size: 13px; margin-top: 4px; }
+    .bar { height: 6px; background: #eeeff5; border-radius: 100px; overflow: hidden; }
+    .bar span { display: block; height: 100%; background: #8b7cf0; width: 0; border-radius: 100px; transition: width .2s; }
+    .course-card .bar { margin-top: 17px; }
+    .note { margin-top: 17px; padding: 17px 20px; background: #f0edff70; border: 1px solid #e9e5ff; border-radius: 15px; color: #746f96; font-size: 12px; line-height: 1.7; }
+    .note strong { color: #5448b1; }
+    .back { background: none; color: var(--accent-dark); border: 0; padding: 0; font-size: 12px; font-weight: 780; margin-bottom: 12px; }
+    .back:hover { text-decoration: underline; }
+    .detail-heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 24px; }
+    .detail-heading h1 { margin-bottom: 7px; }
+    .detail-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+    .detail-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 20px; }
+    .detail-stats .stat { padding: 22px; }
+    .detail-stats .stat-value { font-size: 32px; margin: 14px 0 5px; }
+    .detail-progress { padding: 19px 23px; }
+    .progress-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 12px; font-weight: 740; }
+    .progress-row span:last-child { color: #929aab; font-weight: 650; }
+    .assessment-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px; }
+    .assessment { padding: 23px; min-width: 0; }
+    .assessment-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 13px; margin-bottom: 18px; }
+    .assessment-head h3 { line-height: 1.45; }
+    .assessment-meta { font-size: 11px; line-height: 1.55; color: #929aac; margin-top: 5px; }
+    .weight { background: var(--accent-light); color: var(--accent-dark); font-weight: 800; font-size: 11px; padding: 7px 10px; border-radius: 8px; white-space: nowrap; }
+    .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .fields.single { grid-template-columns: 1fr; }
+    .field { min-width: 0; }
+    .field-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 7px; min-height: 17px; }
+    .field label { font-size: 11px; color: #656f84; font-weight: 740; overflow-wrap: anywhere; }
+    .field-status { font-size: 9px; color: #a0a8b6; font-weight: 800; white-space: nowrap; }
+    .field-status.counting { color: var(--good); }
+    .field-status.dropped { color: var(--warn); }
+    .number-input-wrap { display: flex; position: relative; align-items: center; }
+    .mark-input { height: 43px; width: 100%; min-width: 0; border: 1px solid #e0e4ed; outline: 0; border-radius: 10px; background: #fbfcff; color: #263046; padding: 9px 27px 9px 12px; font-weight: 770; font-size: 14px; font-variant-numeric: tabular-nums; transition: border-color .15s, background .15s; }
+    .mark-input:hover { border-color: #c8c5e0; }
+    .mark-input:focus { border-color: var(--accent); background: white; box-shadow: 0 0 0 3px #6655df12; }
+    .mark-input:invalid { border-color: #d87c83; background: #fff6f6; }
+    .number-input-wrap:after { content: "%"; font-size: 11px; font-weight: 800; color: #a3aab8; position: absolute; right: 12px; pointer-events: none; }
+    .field.is-dropped .mark-input { color: #939aaa; background: #f5f5f7; }
+    .group-foot { font-size: 11px; line-height: 1.5; color: #8993a6; margin-top: 14px; }
+    .detail-foot { display: flex; align-items: center; gap: 14px; justify-content: space-between; flex-wrap: wrap; margin-top: 24px; }
+    .detail-foot p { color: var(--muted); font-size: 11px; margin: 0; }
+    .footer { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 23px; color: #9da5b5; font-size: 11px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .footer strong { color: #667086; }
+    .toast { position: fixed; bottom: 24px; right: 24px; z-index: 20; background: #262942; border: 1px solid #424466; color: white; border-radius: 12px; padding: 12px 18px; box-shadow: 0 12px 35px #20243c33; font-size: 12px; font-weight: 650; opacity: 0; transform: translateY(8px); pointer-events: none; transition: opacity .2s, transform .2s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @media (max-width: 1150px) { .feature-grid { grid-template-columns: 1.2fr 1fr; } .feature-grid .stat:last-child { grid-column: span 2; } .sidebar { width: 218px; } .app { grid-template-columns: 218px minmax(0,1fr); } .scenario { grid-template-columns: 1fr 1fr; } .scenario > div:first-child { grid-column: span 2; } }
+    @media (max-width: 900px) { .app { display: block; } .sidebar { position: relative; width: auto; height: auto; padding: 17px 18px 10px; border-right: 0; border-bottom: 1px solid var(--line); } .brand { padding: 0 4px 16px; } .nav-label, .side-bottom, .nav-credits { display: none; } .nav { flex-direction: row; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; } .nav::-webkit-scrollbar { display: none; } .nav-btn { width: auto; flex: none; padding: 8px 11px; white-space: nowrap; } .nav-icon { width: 26px; height: 26px; } .main { padding-top: 25px; } }
+    @media (max-width: 680px) { .main { padding: 21px 16px 33px; } .topbar { margin-bottom: 22px; align-items: flex-start; } .top-actions { gap: 6px; } .btn { padding: 9px 10px; font-size: 11px; } .eyebrow { font-size: 10px; padding-top: 10px; } .intro { margin-bottom: 20px; } h1 { letter-spacing: -1.1px; } .feature-grid { grid-template-columns: 1fr 1fr; gap: 10px; } .stat { padding: 18px; } .feature-grid .stat.feature { grid-column: span 2; } .feature-grid .stat:last-child { grid-column: auto; } .stat-value { font-size: 27px; } .stat-value.large { font-size: 48px; } .scenario { padding: 19px; gap: 18px; grid-template-columns: 1fr 115px; } .scenario > div:first-child { grid-column: span 2; } .course-grid, .assessment-grid { grid-template-columns: 1fr; } .detail-stats { grid-template-columns: 1fr 1fr; gap: 10px; } .detail-stats .stat:last-child { grid-column: span 2; } .detail-stats .stat { padding: 18px; } .detail-stats .stat-value { font-size: 29px; } .detail-heading { align-items: flex-start; } .detail-heading .credit-badge { margin-top: 32px; } .section-head { margin-top: 28px; } }
+    /* solar-hell: quiet, warm and intentionally plain. */
+    :root {
+      --bg: #f3ede4;
+      --paper: #fdfaf5;
+      --ink: #392d25;
+      --muted: #897a6a;
+      --line: #e5d9cb;
+      --accent: #826047;
+      --accent-dark: #67472f;
+      --accent-light: #ede4d8;
+      --good: #507862;
+      --warn: #a27041;
+      --shadow: none;
+    }
+    html { scroll-behavior: auto; }
+    button:focus-visible, input:focus-visible, summary:focus-visible { outline: 2px solid #aa8b70; outline-offset: 3px; }
+    .app { grid-template-columns: 216px minmax(0, 1fr); }
+    .sidebar { background: #ede4d8; border-color: #dfd0bd; padding: 33px 17px; }
+    .brand { padding: 0 10px 36px; }
+    .brand strong { font: normal 26px Georgia, 'Times New Roman', serif; letter-spacing: -1.1px; color: var(--ink); }
+    .nav { gap: 3px; }
+    .nav-btn { color: #766756; font-size: 13px; border-radius: 8px; font-weight: 590; padding: 11px 13px; }
+    .nav-btn.active { color: #3e3025; background: #fdf9f1; }
+    .nav-btn:hover { background: #f6efe5; }
+    .nav-credits { color: #9d8b77; }
+    .main { width: min(100%, 1150px); padding-top: 33px; }
+    .topbar { margin-bottom: 25px; }
+    .eyebrow { letter-spacing: .8px; color: #978776; }
+    .btn { background: transparent; color: #695544; border-color: #d8c9b8; font-weight: 640; border-radius: 8px; }
+    .btn:hover { color: #483429; border-color: #bda58d; background: #f9f3eb; transform: none; }
+    .btn.danger { color: #96665c; }
+    .panel { border-radius: 12px; }
+    h1 { font: normal clamp(30px, 3.7vw, 43px)/1.15 Georgia, 'Times New Roman', serif; letter-spacing: -1.3px; margin: 0; }
+    h2 { font-size: 18px; font-weight: 670; letter-spacing: -.35px; }
+    h3 { font-size: 14px; font-weight: 680; }
+    .intro { margin: 0 0 20px; }
+    .feature-grid { grid-template-columns: 1.15fr 1fr 1fr; gap: 12px; margin-bottom: 0; }
+    .stat { padding: 22px; }
+    .stat.feature { color: var(--ink); border: 1px solid var(--line); background: var(--paper); }
+    .stat.feature:after { display: none; }
+    .stat-label, .stat.feature .stat-label { color: #897866; font-size: 10px; letter-spacing: .7px; }
+    .stat-value { margin: 14px 0 6px; font-size: 35px; font-weight: 660; letter-spacing: -1.4px; }
+    .stat-value.large { font-size: clamp(37px, 4vw, 48px); margin: 8px 0 6px; }
+    .stat-caption, .stat.feature .stat-caption { color: #9a8b7d; font-size: 11px; }
+    .settings { margin: 0 0 27px; background: transparent; border-color: #e0d4c5; }
+    .settings summary { padding: 13px 17px; list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 12px; font-weight: 660; color: #73614f; }
+    .settings summary::-webkit-details-marker { display: none; }
+    .settings summary:after { content: '+'; font-size: 19px; font-weight: 400; line-height: 1; }
+    .settings[open] summary:after { content: '−'; }
+    .scenario { margin: 0; padding: 14px 19px 20px; border-top: 1px solid var(--line); display: grid; grid-template-columns: minmax(170px,1.4fr) minmax(140px,.6fr); gap: 28px; }
+    .control-label { color: #74614e; }
+    .target-input { background: #fffcf7; border-color: var(--line); border-radius: 7px; }
+    .section-head { margin-top: 26px; }
+    .section-tag { color: #8b7661; background: #eae0d3; border-radius: 7px; }
+    .course-grid { gap: 12px; }
+    .course-card { background: var(--paper); border-radius: 12px; padding: 21px; }
+    .course-card:hover { transform: none; box-shadow: none; border-color: #b9a18a; }
+    .course-code { margin: 0; letter-spacing: .6px; color: #988977; }
+    .course-title { margin-top: 9px; font: normal 23px Georgia, 'Times New Roman', serif; letter-spacing: -.7px; }
+    .course-metrics { margin-top: 22px; }
+    .course-score { font-weight: 650; color: #44352a; }
+    .course-score small { letter-spacing: .5px; color: #988777; }
+    .course-submetric, .course-submetric strong { color: #897865; }
+    .credit-badge { background: #f1e8dc; color: #8d7a65; font-size: 10px; border-radius: 6px; }
+    .bar { background: #eae0d4; height: 5px; }
+    .bar span { background: #977459; }
+    .group-foot { color: #968674; }
+    .detail-stats { gap: 12px; }
+    .assessment-grid { gap: 12px; }
+    .assessment { padding: 21px; }
+    .assessment-meta { color: #9a8976; }
+    .weight { color: #775943; background: #f0e6da; font-weight: 700; }
+    .mark-input { background: #fffcf7; color: #46352a; border-color: #e4d6c6; border-radius: 7px; }
+    .mark-input:hover { border-color: #cbb39a; }
+    .mark-input:focus { border-color: #9b7b5f; box-shadow: 0 0 0 3px #99755615; }
+    .field label { color: #746352; }
+    .field.is-dropped .mark-input { background: #f0eae1; }
+    .back { color: #7f5e44; }
+    .footer { margin-top: 35px; padding-top: 17px; }
+    .toast { background: #47372c; border: 0; box-shadow: none; }
+    @media (max-width: 1150px) { .app { grid-template-columns: 205px minmax(0, 1fr); } .feature-grid { grid-template-columns: 1fr 1fr 1fr; } .feature-grid .stat:last-child { grid-column: auto; } }
+    @media (max-width: 900px) { .app { display: block; } .sidebar { padding: 19px 18px 10px; } .brand { padding: 0 3px 15px; } .nav-btn { padding: 9px 13px; } .main { padding-top: 22px; } }
+    @media (max-width: 680px) { .feature-grid { grid-template-columns: 1fr 1fr; } .feature-grid .stat.feature { grid-column: span 2; } .feature-grid .stat:last-child { grid-column: auto; } .stat { padding: 17px; } .stat-value { font-size: 29px; } .stat-value.large { font-size: 44px; } .scenario { grid-template-columns: 1fr 1fr; gap: 18px; } .scenario > div:first-child { grid-column: auto; } .course-grid, .assessment-grid { grid-template-columns: 1fr; } .detail-stats { grid-template-columns: 1fr 1fr; } }
+    /* Static starfield, dark espresso surfaces and a title-activated red accent. */
+    :root {
+      --bg: #0b0e19;
+      --paper: #1a1b2beb;
+      --ink: #f5eee6;
+      --muted: #b0a3a4;
+      --line: #383646;
+      --accent: #c5a181;
+      --accent-dark: #e5bda0;
+      --accent-light: #342a31;
+      --good: #92cba7;
+      --warn: #e5ab73;
+    }
+    body {
+      background: radial-gradient(ellipse at 74% 8%, #23203a 0, transparent 43%),
+                  radial-gradient(ellipse at 20% 90%, #1b2538 0, transparent 50%),
+                  #0b0e19;
+      color: var(--ink);
+    }
+    #starfield { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .app { position: relative; z-index: 1; }
+    .sidebar { background: #111321e8; border-color: #33303e; }
+    .brand-trigger { display: inline-block; padding: 0; border: 0; background: transparent; color: var(--ink); font: normal 26px Georgia, 'Times New Roman', serif; letter-spacing: -1.1px; text-align: left; transition: color .2s, text-shadow .2s; }
+    .brand-trigger:hover { color: var(--accent-dark); }
+    .nav-btn { color: #b3a5a4; }
+    .nav-btn:hover { background: #262534; color: var(--ink); }
+    .nav-btn.active { color: #f0dfcf; background: #34303b; }
+    .nav-credits, .eyebrow, .course-code { color: #a699a0; }
+    .panel, .course-card { background: var(--paper); border-color: var(--line); }
+    .stat.feature { background: var(--paper); border-color: var(--line); }
+    .stat-label, .stat.feature .stat-label { color: #c1aaa0; }
+    .stat-caption, .stat.feature .stat-caption, .section-head p, .assessment-meta, .group-foot { color: #a99b9e; }
+    .stat-value, .course-score, .course-title, h1, h2, h3 { color: var(--ink); }
+    .course-score small, .course-submetric, .course-submetric strong { color: #bbaaa9; }
+    .btn { color: #e6c9b4; background: #211d2c; border-color: #4a3c43; }
+    .btn:hover { color: #fff1e7; background: #312634; border-color: var(--accent); }
+    .settings { background: #151626d9; border-color: var(--line); }
+    .settings summary, .control-label { color: #dbbca6; }
+    .target-input, .mark-input { color: #f7ede5; background: #111522; border-color: #494051; }
+    .target-wrap span, .number-input-wrap:after { color: #baadad; }
+    .mark-input:hover { border-color: #a38b81; }
+    .mark-input:focus { background: #191725; border-color: var(--accent); box-shadow: 0 0 0 3px #c6a28420; }
+    .field label { color: #d4bfb3; }
+    .field.is-dropped .mark-input { background: #20202b; color: #90888d; }
+    .weight, .credit-badge, .section-tag { color: #e2c4ad; background: #362b32; }
+    .bar { background: #3c3542; }
+    .bar span { background: var(--accent); }
+    .course-card:hover { border-color: var(--accent); }
+    .back { color: var(--accent-dark); }
+    .footer { color: #938c9b; }
+    .toast { background: #30202d; color: #fff4ee; }
+    .red-accent {
+      --accent: #eb586c;
+      --accent-dark: #ff8391;
+      --accent-light: #401e2a;
+    }
+    .red-accent .brand-trigger { color: #ff7888; text-shadow: 0 0 20px #ed445c7d; }
+    .red-accent .nav-btn.active { color: #ffe4e7; background: #47232e; box-shadow: inset 3px 0 #ee5e71; }
+    .red-accent .stat.feature { border-color: #8d4050; box-shadow: 0 0 24px #db405117; }
+    .red-accent .weight, .red-accent .section-tag { background: #462632; color: #ff99a5; }
+    .red-accent .btn:hover, .red-accent .course-card:hover { border-color: #ef697a; }
+    .red-accent .mark-input:focus { border-color: #ef697a; box-shadow: 0 0 0 3px #e84f652b; }
+    .red-accent input[type="range"] { accent-color: #ed5c71; }
+    .red-accent .field-status.counting { color: #ff9daa; }
+    @media (max-width: 900px) { .sidebar { background: #111321f5; } }
+    @media (prefers-reduced-motion: reduce) { *, *:before, *:after { scroll-behavior: auto !important; animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="app">
+    <aside class="sidebar" aria-label="Course navigation">
+      <div class="brand"><button type="button" class="brand-trigger" id="brandToggle" aria-pressed="false" title="Toggle red highlight">solar-hell</button></div>
+      <nav class="nav" id="nav" aria-label="Main navigation"></nav>
+    </aside>
+    <main class="main">
+      <div class="topbar">
+        <div class="eyebrow" id="breadcrumb">Overview</div>
+        <div class="top-actions">
+          <button class="btn" id="exportBtn" type="button" title="Download your marks as JSON">↓ Export</button>
+          <button class="btn" id="importBtn" type="button" title="Restore marks from an exported JSON file">↑ Import</button>
+          <input class="sr-only" id="importFile" type="file" accept=".json,application/json" aria-label="Import JSON backup">
+        </div>
+      </div>
+      <details class="settings panel" aria-label="Forecast settings">
+        <summary>Forecast settings</summary>
+        <div class="scenario">
+          <div><label class="control-label" for="forecastSlider">Expected on unmarked work <output id="forecastDisplay">70%</output></label><input type="range" id="forecastSlider" min="0" max="100" step="1" value="70"></div>
+          <div><label class="control-label" for="targetInput">Target</label><div class="target-wrap"><input class="target-input" id="targetInput" type="number" min="0" max="100" step="any" value="70"><span>%</span></div></div>
+        </div>
+      </details>
+      <div id="view" aria-live="off"></div>
+      <footer class="footer"><span id="saveStatus">Saved locally</span></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script>
+    "use strict";
+
+    // Edit this course list if your official assessment details change.
+    const courses = [
+      { id: "cs1f", code: "COMPSCI1006", title: "CS1F", credits: 10, groups: [
+        { id: "er", name: "ER Diagram", weight: 1.6, items: ["ER Diagram"] },
+        { id: "db", name: "Database Report", weight: 6.4, items: ["Database Report"] },
+        { id: "pi", name: "Professional Issues Assessment", weight: 4, items: ["Professional Issues"] },
+        { id: "hci", name: "Human Computer Interaction Assessment", weight: 8, items: ["HCI Assessment"] },
+        { id: "exam", name: "Final Exam", weight: 80, items: ["Final Exam"] }
+      ] },
+      { id: "ioop2", code: "COMPSCI2001", title: "IOOP2", credits: 10, groups: [
+        { id: "labs", name: "Labs A–H", weight: 18, best: 6, items: ["Lab A", "Lab B", "Lab C", "Lab D", "Lab E", "Lab F", "Lab G", "Lab H"] },
+        { id: "quizzes", name: "Quizzes A–H", weight: 5, best: 6, items: ["Quiz A", "Quiz B", "Quiz C", "Quiz D", "Quiz E", "Quiz F", "Quiz G", "Quiz H"] },
+        { id: "peer", name: "Peer Reviews", weight: 2, items: ["Week 5", "Week 8"], note: "Assumed to be 1% each; change the weights here if confirmed otherwise." },
+        { id: "labexam", name: "Lab Exam", weight: 15, items: ["Lab Exam"] },
+        { id: "exam", name: "Final Exam", weight: 60, items: ["Final Exam"] }
+      ] },
+      { id: "af2", code: "COMPSCI2003", title: "AF2", credits: 10, groups: [
+        { id: "ae1", name: "Assessed Exercise 1", weight: 10, items: ["Exercise 1"] },
+        { id: "ae2", name: "Assessed Exercise 2", weight: 10, items: ["Exercise 2"] },
+        { id: "quizzes", name: "Quizzes", weight: 5, items: ["Quiz Total"] },
+        { id: "exam", name: "Final Exam", weight: 75, items: ["Final Exam"] }
+      ] },
+      { id: "nose2", code: "COMPSCI2024", title: "NOSE2", credits: 10, groups: [
+        { id: "ae1", name: "Assessed Exercise 1", weight: 10, items: ["Exercise 1"] },
+        { id: "ae2", name: "Assessed Exercise 2", weight: 10, items: ["Exercise 2"] },
+        { id: "exam", name: "Final Exam", weight: 80, items: ["Final Exam"] }
+      ] },
+      { id: "succeed", code: "COMPSCI2037", title: "SUCCEED", credits: 20, groups: [
+        { id: "portfolio", name: "ePortfolio Entries", weight: 10, best: 4, items: ["Entry 1", "Entry 2", "Entry 3", "Entry 4", "Entry 5"] },
+        { id: "essay", name: "Essay & In-person Presentation", weight: 20, items: ["Combined Mark"] },
+        { id: "weekly", name: "Weekly Programming Assessments", weight: 20, best: 4, items: ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"] },
+        { id: "pa1", name: "Programming Assessment 1", weight: 10, items: ["Assessment 1"] },
+        { id: "pa2", name: "Programming Assessment 2", weight: 20, items: ["Assessment 2"] },
+        { id: "project", name: "Group Python Project & Video Presentation", weight: 20, items: ["Combined Mark"] }
+      ] }
+    ];
+
+    const totalCredits = courses.reduce((sum, course) => sum + course.credits, 0);
+    const knownKeys = new Set(courses.flatMap(course => course.groups.flatMap(group =>
+      group.items.map((_, index) => `${course.id}.${group.id}.${index}`)
+    )));
+    const storeKey = "glasgow-gradebook-2026-27-v1";
+    const $ = (id) => document.getElementById(id);
+    const clamp = (number) => Math.min(100, Math.max(0, number));
+    const nice = (n) => Number.isFinite(n) ? `${Number(n.toFixed(1))}%` : "—";
+    const compact = (n) => Number.isFinite(n) ? Number(n.toFixed(1)).toString() : "—";
+    const isMark = (x) => typeof x === "number" && Number.isFinite(x) && x >= 0 && x <= 100;
+
+    let marks = {};
+    let forecast = 70;
+    let target = 70;
+    let active = "overview";
+    let saveTimer;
+    let toastTimer;
+    let storageAvailable = true;
+
+    function load() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storeKey) || "{}");
+        if (saved && typeof saved === "object") {
+          if (saved.marks && typeof saved.marks === "object") {
+            for (const [key, value] of Object.entries(saved.marks)) {
+              if (knownKeys.has(key) && isMark(value)) marks[key] = value;
+            }
+          }
+          if (isMark(saved.forecast)) forecast = saved.forecast;
+          if (isMark(saved.target)) target = saved.target;
+        }
+      } catch (e) {
+        storageAvailable = false;
+        $("saveStatus").textContent = "Session only · Storage unavailable";
+      }
+    }
+
+    function save() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(() => {
+        try {
+          localStorage.setItem(storeKey, JSON.stringify({ marks, forecast, target }));
+          if (storageAvailable) $("saveStatus").textContent = "Saved locally";
+        } catch (e) {
+          storageAvailable = false;
+          $("saveStatus").textContent = "Session only · Export to keep your marks";
+        }
+      }, 150);
+    }
+
+    function keyFor(course, group, index) { return `${course.id}.${group.id}.${index}`; }
+    function positions(group) { return group.best || group.items.length; }
+
+    // A best-of group's highest k marks count, even if other marks were entered.
+    // Missing entries only use the scenario value when estimating a final grade.
+    function groupScore(course, group, fillMissing = null) {
+      const all = group.items.map((_, index) => {
+        const key = keyFor(course, group, index);
+        const actual = marks[key];
+        return { index, mark: isMark(actual) ? actual : fillMissing, entered: isMark(actual) };
+      });
+      const known = all.filter(item => item.entered).sort((a, b) => b.mark - a.mark || a.index - b.index);
+      const selectedKnown = known.slice(0, positions(group));
+      const picked = all.filter(item => isMark(item.mark)).sort((a, b) => b.mark - a.mark || a.index - b.index).slice(0, positions(group));
+      const unit = group.weight / positions(group);
+      return {
+        knownPoints: selectedKnown.reduce((sum, item) => sum + item.mark * unit / 100, 0),
+        knownWeight: selectedKnown.length * unit,
+        scorePoints: picked.reduce((sum, item) => sum + item.mark * unit / 100, 0),
+        entered: known.length,
+        selected: new Set(selectedKnown.map(item => item.index))
+      };
+    }
+
+    function courseStats(course, assumedMark = forecast) {
+      let knownPoints = 0, knownWeight = 0, projected = 0, entered = 0, total = 0;
+      for (const group of course.groups) {
+        const result = groupScore(course, group, assumedMark);
+        knownPoints += result.knownPoints;
+        knownWeight += result.knownWeight;
+        projected += result.scorePoints;
+        entered += result.entered;
+        total += group.items.length;
+      }
+      return { knownPoints, knownWeight, projected, entered, total,
+        current: knownWeight ? knownPoints / knownWeight * 100 : NaN };
+    }
+
+    function overallStats(assumedMark = forecast) {
+      let knownPoints = 0, knownWeight = 0, projected = 0, entered = 0, total = 0;
+      for (const course of courses) {
+        const s = courseStats(course, assumedMark);
+        knownPoints += s.knownPoints * course.credits / totalCredits;
+        knownWeight += s.knownWeight * course.credits / totalCredits;
+        projected += s.projected * course.credits / totalCredits;
+        entered += s.entered;
+        total += s.total;
+      }
+      return { knownPoints, knownWeight, projected, entered, total,
+        current: knownWeight ? knownPoints / knownWeight * 100 : NaN };
+    }
+
+    // Binary search gives the mark needed on EVERY unentered item. This works
+    // even for best-of groups, where a normal linear average would be wrong.
+    function requiredMark(statsFunction) {
+      const lowScore = statsFunction(0).projected;
+      const highScore = statsFunction(100).projected;
+      if (lowScore >= target - 1e-8) return { value: 0, note: "Target met even if unmarked work is 0%." };
+      if (highScore < target - 1e-8) return { value: NaN, note: "Target cannot be reached with the remaining assessments." };
+      let lo = 0, hi = 100;
+      for (let iteration = 0; iteration < 28; iteration++) {
+        const mid = (lo + hi) / 2;
+        if (statsFunction(mid).projected >= target) hi = mid;
+        else lo = mid;
+      }
+      return { value: hi, note: "Needed on each unmarked assessment to reach your target." };
+    }
+
+    function card(course) {
+      const s = courseStats(course);
+      const progress = Math.round(s.entered / s.total * 100);
+      return `<button type="button" class="course-card" data-view="${course.id}" aria-label="Open ${course.title}">
+        <div class="course-top"><span class="course-code">${course.code}</span><span class="credit-badge">${course.credits} credits</span></div>
+        <div class="course-title">${course.title}</div>
+        <div class="course-metrics"><div class="course-score"><small>Assessed average</small>${nice(s.current)}</div><div class="course-submetric">Estimated final<strong>${nice(s.projected)}</strong></div></div>
+        <div class="bar" role="progressbar" aria-valuenow="${s.entered}" aria-valuemax="${s.total}" aria-label="${course.title} marks entered"><span style="width:${progress}%"></span></div>
+        <div class="group-foot">${s.entered}/${s.total} entered <span style="float:right">Open →</span></div>
+      </button>`;
+    }
+
+    function renderOverview() {
+      const s = overallStats();
+      const needed = requiredMark(overallStats);
+      return `<div class="intro"><h1>Overview</h1></div>
+        <div class="feature-grid">
+          <div class="stat panel feature"><div class="stat-label">Assessed average</div><div class="stat-value large">${nice(s.current)}</div><div class="stat-caption">Entered marks · credit-weighted</div></div>
+          <div class="stat panel"><div class="stat-label">Estimated final</div><div class="stat-value">${nice(s.projected)}</div><div class="stat-caption">Remaining work at ${nice(forecast)}</div></div>
+          <div class="stat panel"><div class="stat-label">Needed for ${nice(target)}</div><div class="stat-value">${nice(needed.value)}</div><div class="stat-caption">${needed.value === 0 ? "No minimum remaining" : Number.isFinite(needed.value) ? "On each unmarked item" : "Not reachable"}</div></div>
+        </div>
+        <div class="section-head"><div><h2>Courses</h2><p>${s.entered}/${s.total} marks entered</p></div><span class="section-tag">${totalCredits} credits</span></div>
+        <div class="course-grid">${courses.map(card).join("")}</div>`;
+    }
+
+    function groupHTML(course, group) {
+      const best = positions(group);
+      const isBest = best < group.items.length;
+      const subtitle = isBest ? `Best ${best} of ${group.items.length} count · ${compact(group.weight / best)}% per selected mark` :
+        group.items.length > 1 ? `${compact(group.weight / best)}% per mark` : "Enter your assessment mark";
+      const fields = group.items.map((item, index) => {
+        const key = keyFor(course, group, index);
+        const value = marks[key];
+        const labelId = `label-${course.id}-${group.id}-${index}`;
+        return `<div class="field" data-field="${key}"><div class="field-top"><label id="${labelId}" for="mark-${course.id}-${group.id}-${index}">${item}</label><span class="field-status">Not entered</span></div>
+          <div class="number-input-wrap"><input type="number" class="mark-input" data-key="${key}" id="mark-${course.id}-${group.id}-${index}" min="0" max="100" step="any" inputmode="decimal" placeholder="—" aria-labelledby="${labelId}" value="${isMark(value) ? value : ""}"></div></div>`;
+      }).join("");
+      return `<section class="assessment panel"><div class="assessment-head"><div><h3>${group.name}</h3><div class="assessment-meta">${subtitle}</div></div><span class="weight">${compact(group.weight)}%</span></div>
+        <div class="fields ${group.items.length === 1 ? "single" : ""}">${fields}</div>
+        ${group.note ? `<div class="group-foot">${group.note}</div>` : ""}
+        ${isBest ? `<div class="group-foot">Highest ${best} marks count automatically. Lower marks are labelled “Dropped” once enough results are entered.</div>` : ""}</section>`;
+    }
+
+    function renderCourse(course) {
+      return `<button type="button" class="back" data-view="overview">← Overview</button>
+        <div class="detail-heading"><div><div class="eyebrow">${course.code}</div><h1>${course.title}</h1></div><span class="credit-badge">${course.credits} credits</span></div>
+        <div class="detail-stats">
+          <div class="stat panel"><div class="stat-label">Assessed average</div><div class="stat-value" id="courseCurrent">—</div></div>
+          <div class="stat panel"><div class="stat-label">Estimated final</div><div class="stat-value" id="courseProjected">—</div></div>
+          <div class="stat panel"><div class="stat-label">Needed for target</div><div class="stat-value" id="courseNeeded">—</div><div class="stat-caption" id="courseNeededNote"></div></div>
+        </div>
+        <div class="panel detail-progress"><div class="progress-row"><span>Entered</span><span id="courseCount"></span></div><div class="bar"><span id="courseBar"></span></div></div>
+        <div class="section-head"><div><h2>Assessments</h2></div><span class="section-tag">${course.groups.reduce((sum, g) => sum + g.weight, 0)}%</span></div>
+        <div class="assessment-grid">${course.groups.map(group => groupHTML(course, group)).join("")}</div>
+        <div class="detail-foot"><p></p><button type="button" class="btn danger" id="clearCourse" data-course="${course.id}">Clear marks</button></div>`;
+    }
+
+    function updateCourse(course) {
+      const s = courseStats(course);
+      const needed = requiredMark(value => courseStats(course, value));
+      $("courseCurrent").textContent = nice(s.current);
+      $("courseProjected").textContent = nice(s.projected);
+      $("courseNeeded").textContent = nice(needed.value);
+      $("courseNeededNote").textContent = needed.note;
+      $("courseCount").textContent = `${s.entered} / ${s.total}`;
+      $("courseBar").style.width = `${s.entered / s.total * 100}%`;
+      for (const group of course.groups) {
+        const result = groupScore(course, group);
+        for (let i = 0; i < group.items.length; i++) {
+          const key = keyFor(course, group, i);
+          const node = document.querySelector(`[data-field="${key}"]`);
+          if (!node) continue;
+          const status = node.querySelector(".field-status");
+          const entered = isMark(marks[key]);
+          const dropped = entered && !result.selected.has(i);
+          status.textContent = !entered ? "Not entered" : dropped ? "Dropped" : "Counting";
+          status.className = `field-status ${!entered ? "" : dropped ? "dropped" : "counting"}`;
+          node.classList.toggle("is-dropped", dropped);
+        }
+      }
+    }
+
+    function renderNav() {
+      $("nav").innerHTML = `<button type="button" class="nav-btn" data-view="overview"><span class="nav-text">Overview</span></button>` +
+        courses.map(course => `<button type="button" class="nav-btn" data-view="${course.id}"><span class="nav-text">${course.title}</span><span class="nav-credits">${course.credits}</span></button>`).join("");
+    }
+
+    function render() {
+      $("view").innerHTML = active === "overview" ? renderOverview() : renderCourse(courses.find(c => c.id === active));
+      $("breadcrumb").textContent = active === "overview" ? "Overview" : active.toUpperCase();
+      document.querySelectorAll(".nav-btn").forEach(button => {
+        const selected = button.dataset.view === active;
+        button.classList.toggle("active", selected);
+        if (selected) button.setAttribute("aria-current", "page");
+        else button.removeAttribute("aria-current");
+      });
+      if (active !== "overview") updateCourse(courses.find(c => c.id === active));
+    }
+
+    function refresh() {
+      if (active === "overview") $("view").innerHTML = renderOverview();
+      else updateCourse(courses.find(c => c.id === active));
+    }
+
+    function navigate(id) {
+      if (id !== "overview" && !courses.some(course => course.id === id)) return;
+      active = id;
+      if (location.hash !== `#${id}`) history.replaceState(null, "", `#${id}`);
+      render();
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    function toast(message) {
+      $("toast").textContent = message;
+      $("toast").classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => $("toast").classList.remove("show"), 3200);
+    }
+
+    function exportData() {
+      const content = JSON.stringify({ version: 1, exportedAt: new Date().toISOString(), marks, forecast, target }, null, 2);
+      const url = URL.createObjectURL(new Blob([content], { type: "application/json" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "solar-hell-backup.json";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      toast("Exported.");
+    }
+
+    async function importData(file) {
+      if (!file) return;
+      try {
+        if (file.size > 1024 * 1024) throw new Error("File is too large.");
+        const data = JSON.parse(await file.text());
+        if (!data || data.version !== 1 || !data.marks || typeof data.marks !== "object" || Array.isArray(data.marks)) throw new Error("Not a compatible backup.");
+        const nextMarks = {};
+        for (const [key, value] of Object.entries(data.marks)) {
+          if (knownKeys.has(key) && isMark(value)) nextMarks[key] = value;
+        }
+        if (!confirm(`Replace your current grades with ${Object.keys(nextMarks).length} marks from this backup?`)) return;
+        marks = nextMarks;
+        if (isMark(data.forecast)) forecast = data.forecast;
+        if (isMark(data.target)) target = data.target;
+        $("forecastSlider").value = forecast;
+        $("forecastDisplay").textContent = nice(forecast);
+        $("targetInput").value = target;
+        save();
+        render();
+        toast("Backup restored successfully.");
+      } catch (error) {
+        toast(`Import failed: ${error.message}`);
+      } finally {
+        $("importFile").value = "";
+      }
+    }
+
+    // One delegated listener handles all dynamically rendered assessment fields.
+    document.addEventListener("input", event => {
+      const input = event.target;
+      if (input.matches(".mark-input")) {
+        const key = input.dataset.key;
+        if (!knownKeys.has(key)) return;
+        if (input.value === "") delete marks[key];
+        else {
+          const number = Number(input.value);
+          if (!isMark(number)) return; // Keep invalid text visible until corrected.
+          marks[key] = number;
+        }
+        refresh();
+        save();
+      } else if (input.id === "forecastSlider") {
+        forecast = clamp(Number(input.value));
+        $("forecastDisplay").textContent = nice(forecast);
+        refresh();
+        save();
+      } else if (input.id === "targetInput" && input.value !== "") {
+        const number = Number(input.value);
+        if (!isMark(number)) return;
+        target = number;
+        refresh();
+        save();
+      }
+    });
+
+    document.addEventListener("click", event => {
+      const nav = event.target.closest("[data-view]");
+      if (nav) navigate(nav.dataset.view);
+      if (event.target.closest("#clearCourse")) {
+        const course = courses.find(c => c.id === active);
+        if (course && confirm(`Remove every saved mark for ${course.title}? This cannot be undone unless you exported a backup.`)) {
+          for (const key of Object.keys(marks)) if (key.startsWith(`${course.id}.`)) delete marks[key];
+          render();
+          save();
+          toast(`${course.title} marks cleared.`);
+        }
+      }
+    });
+
+    $("exportBtn").addEventListener("click", exportData);
+    $("importBtn").addEventListener("click", () => $("importFile").click());
+    $("importFile").addEventListener("change", event => importData(event.target.files[0]));
+    window.addEventListener("hashchange", () => {
+      const next = location.hash.slice(1).toLowerCase();
+      active = next === "overview" || courses.some(c => c.id === next) ? next : "overview";
+      render();
+    });
+
+    load();
+    for (const course of courses) {
+      const sum = course.groups.reduce((total, group) => total + group.weight, 0);
+      if (Math.abs(sum - 100) > 0.0001) console.error(`${course.code} assessment weights total ${sum}%, expected 100%.`);
+    }
+    $("forecastSlider").value = forecast;
+    $("forecastDisplay").textContent = nice(forecast);
+    $("targetInput").value = target;
+    renderNav();
+    const initial = location.hash.slice(1).toLowerCase();
+    active = initial === "overview" || courses.some(c => c.id === initial) ? initial : "overview";
+    render();
+
+    // Draw once (and after resizing). No animation loop, assets or requests.
+    function drawStarfield() {
+      const canvas = $("starfield");
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      const width = Math.max(1, window.innerWidth);
+      const height = Math.max(1, window.innerHeight);
+      canvas.width = width;
+      canvas.height = height;
+      let seed = 923711;
+      const random = () => {
+        seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+        return seed / 4294967296;
+      };
+      const count = Math.min(420, Math.max(100, Math.round(width * height / 5200)));
+      for (let index = 0; index < count; index++) {
+        const x = random() * width;
+        const y = random() * height;
+        const brightness = 0.22 + random() * 0.7;
+        const radius = 0.4 + random() * 1.15;
+        const warm = random() > 0.75;
+        context.fillStyle = warm ? `rgba(255,216,185,${brightness})` : `rgba(220,230,255,${brightness})`;
+        context.beginPath();
+        context.arc(x, y, radius, 0, Math.PI * 2);
+        context.fill();
+        if (index % 47 === 0) {
+          context.strokeStyle = `rgba(255,235,224,${brightness * 0.38})`;
+          context.lineWidth = 0.65;
+          context.beginPath();
+          context.moveTo(x - 4, y);
+          context.lineTo(x + 4, y);
+          context.moveTo(x, y - 4);
+          context.lineTo(x, y + 4);
+          context.stroke();
+        }
+      }
+    }
+
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(drawStarfield, 120);
+    });
+    drawStarfield();
+
+    // Clicking the title toggles red accents without changing saved marks.
+    const highlightKey = "solar-hell-red-highlight";
+    function setHighlight(enabled) {
+      document.documentElement.classList.toggle("red-accent", enabled);
+      $("brandToggle").setAttribute("aria-pressed", String(enabled));
+    }
+    let highlightEnabled = false;
+    try { highlightEnabled = localStorage.getItem(highlightKey) === "true"; } catch (_) { /* private session */ }
+    setHighlight(highlightEnabled);
+    $("brandToggle").addEventListener("click", () => {
+      highlightEnabled = !highlightEnabled;
+      setHighlight(highlightEnabled);
+      try { localStorage.setItem(highlightKey, String(highlightEnabled)); } catch (_) { /* private session */ }
+    });
+  </script>
+</body>
+</html>
